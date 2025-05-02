@@ -140,6 +140,13 @@ After running all tests, the tester prints a summary showing:
 - The number of test cases passed and failed.
 - Details for any failed tests, including the expected and actual output.
 
+### Zipfian Distribution Test
+- Further verifies correctness of BagDemo.java by testing it against Zipf's Law and doing a Kolmogorov-Smirnov test.
+- In short, we want the distribution of a listed sorted from most frequent artifact to least frequent artifact to have a slope of around -1.
+- Alice in Wonderland and Moby Dick's BagDemo outputs are both tested using these means to verify BagDemo counts the occurance of words in accordance with rates we would statistically expect.
+- See [this Wikipedia article](https://en.wikipedia.org/wiki/Zipf%27s_law#Empirical_testing) for further information.
+
 ### How to Add More Tests
 
-To add more test cases, simply add more entries to the `tests` array in `BagDemoTest.java`, specifying the input file and the word you want to check.
+- To add more test cases, simply add more entries to the `tests` array in `BagDemoTest.java`, specifying the input file and the word you want to check.
+- The Zipfian tests are handled separately, as a Zipf analysis of shorter texts isn't so useful.
