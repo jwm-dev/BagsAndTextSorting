@@ -74,6 +74,91 @@ public class BagDemoTest {
         return sb.toString().trim();
     }
 
+    private static void analyzeZipfDistribution(String bagDemoOutput, String distributionName) {
+        // Parse output: word [ (count) ]
+        List<Integer> frequencies = new ArrayList<>();
+        List<String> words = new ArrayList<>();
+        String[] lines = bagDemoOutput.split("\n");
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+            int count = 1;
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\((\\d+)\\)\\s*$").matcher(line);
+            if (m.find()) {
+                count = Integer.parseInt(m.group(1));
+                words.add(line.substring(0, m.start()).trim());
+            } else {
+                words.add(line);
+            }
+            frequencies.add(count);
+        }
+        if (frequencies.isEmpty()) {
+            System.out.println("No words found for Zipf analysis.");
+            return;
+        }
+    
+        // Pair words and frequencies, then sort descending by frequency
+        List<Map.Entry<String, Integer>> wordFreq = new ArrayList<>();
+        for (int i = 0; i < words.size(); i++) {
+            wordFreq.add(new AbstractMap.SimpleEntry<>(words.get(i), frequencies.get(i)));
+        }
+        wordFreq.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
+    
+        System.out.println("========== ZIPF'S LAW ANALYSIS: " + distributionName + " ==========");
+    
+        // Print top 5 most frequent words
+        System.out.println("Top 5 most frequent words:");
+        System.out.println("--------------------------");
+        for (int i = 0; i < Math.min(5, wordFreq.size()); i++) {
+            Map.Entry<String, Integer> entry = wordFreq.get(i);
+            System.out.printf("%d. %s (%d)\n", i + 1, entry.getKey(), entry.getValue());
+        }
+        System.out.println();
+    
+        // Sort frequencies descending (rank 1 = most frequent)
+        frequencies.sort(Collections.reverseOrder());
+    
+        // Compute best-fit slope in log-log space
+        double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        int n = frequencies.size();
+        for (int i = 0; i < n; i++) {
+            int rank = i + 1;
+            int freq = frequencies.get(i);
+            double logRank = Math.log10(rank);
+            double logFreq = Math.log10(freq);
+            sumX += logRank;
+            sumY += logFreq;
+            sumXY += logRank * logFreq;
+            sumXX += logRank * logRank;
+        }
+        double slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    
+        // Kolmogorov–Smirnov test for Zipf's Law
+        double[] empiricalCDF = new double[n];
+        double[] zipfCDF = new double[n];
+        double total = 0;
+        for (int f : frequencies) total += f;
+        double running = 0;
+        for (int i = 0; i < n; i++) {
+            running += frequencies.get(i);
+            empiricalCDF[i] = running / total;
+        }
+        double zipfSum = 0;
+        for (int i = 1; i <= n; i++) zipfSum += 1.0 / i;
+        double runningZipf = 0;
+        for (int i = 0; i < n; i++) {
+            runningZipf += 1.0 / (i + 1) / zipfSum;
+            zipfCDF[i] = runningZipf;
+        }
+        double ks = 0;
+        for (int i = 0; i < n; i++) {
+            ks = Math.max(ks, Math.abs(empiricalCDF[i] - zipfCDF[i]));
+        }
+    
+        System.out.printf("Best-fit slope (should be close to -1 for Zipf): %.4f\n", slope);
+        System.out.printf("Kolmogorov–Smirnov statistic (lower is better fit): %.4f\n", ks);
+    }
+
     public static void main(String[] args) throws Exception {
         String[][] tests = {
             {"txt/Sorting Input File.txt", "love"},
@@ -138,5 +223,11 @@ public class BagDemoTest {
             System.out.println("\nAll tests passed!");
         }
         System.out.println("==================================");
+
+        // Zipf's Law analysis
+        String aliceOut = readFile("txt/alice.out");
+        analyzeZipfDistribution(aliceOut, "alice.out");
+        String mobyOut = readFile("txt/moby.out");
+        analyzeZipfDistribution(mobyOut, "moby.out");
     }
 }
