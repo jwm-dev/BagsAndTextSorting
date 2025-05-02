@@ -141,8 +141,8 @@ After running all tests, the tester prints a summary showing:
 - Details for any failed tests, including the expected and actual output.
 
 ### Zipfian Distribution Test
-- Further verifies correctness of BagDemo.java by testing it against Zipf's Law and doing a Kolmogorov-Smirnov test.
-- In short, we want the distribution of a listed sorted from most frequent artifact to least frequent artifact to have a slope of around -1.
+- Further verifies correctness of BagDemo.java by testing it against Zipf's Law and by doing a Kolmogorov-Smirnov test.
+- In short, we want the distribution of a list sorted from most frequent artifact to least frequent artifact to have a slope of around -1 when it comes to language.
 - Alice in Wonderland and Moby Dick's BagDemo outputs are both tested using these means to verify BagDemo counts the occurance of words in accordance with rates we would statistically expect.
 - See [this Wikipedia article](https://en.wikipedia.org/wiki/Zipf%27s_law#Empirical_testing) for further information.
 
