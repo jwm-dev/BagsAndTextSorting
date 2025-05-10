@@ -80,6 +80,8 @@ John (2)
 knocking
 ```
 
+![example](img/example.png)
+
 ## How to Run
 
 1. **Compile:**
